@@ -23,9 +23,12 @@ print(prophaztest)
 # visualize effect of season over time
 seasonhazplot <- plot(prophaztest[3], lwd = 2) +
   abline(0, 0, col = 1, lty = 3, lwd = 2) +
+  abline(v = 0.1418919,
+         col = "#F71735",
+         lwd = 2) +
   abline(
     h = calf.loss$coef[3],
-    col = 3,
+    col = "#86BAA1",
     lwd = 2,
     lty = 2
   )
@@ -64,26 +67,33 @@ plot(simulationOutput)
 # data visualization------------------------------------------------------------
 # Kaplan-Meier plot for effect of calf age at death
 
+library(wesanderson)
+
+wes_palette("AsteroidCity3")
+print(wes_palette("Zissou1Continuous"))
+
+names(wes_palettes)
+wes_palette("GrandBudapest1", n = 4, type = "discrete")
+
+pal <- c("#C6DBEF", "#6BAED6", "#08519C")
+
+pal <- c("#86BAA1", "#6B9883", "#49695A")
+
 AgePlot <- ggsurvplot(
   surv_fit(Surv(TimeToEvent, EventCensored) ~ CalfAgeDeathCategories,
            data = DeathBirthIntervals),
   fun = "event",
-  linewidth = 1.5,
-  censor.size = 6,
+  linewidth = .8,
+  censor.size = 4,
   axes.offset = TRUE,
-  ggtheme = ggplot2::theme_classic(),
-  palette = c("hue"), 
+  ggtheme = ggplot2::theme_classic(base_size = 6),
+  palette = alpha(pal, .7), 
   break.time.by = 12,
   xlab = "Time (months)",
-  ylab = "Completion probability",
-  font.main = c(12, "plain", "black"),
-  font.x = c(12, "plain", "black"),
-  font.y = c(12, "plain", "black"),
-  font.tickslab = c(10, "plain", "black"),
-  legend = c(0.8, 0.3),
+  ylab = "Probability of next birth",
   legend.title = "Calf age at death:",
-  legend.labs = c("newborn", "young-of-year", "yearling"),
-  font.legend = c(12, "plain", "black")
+  legend.labs = c("0-2 months", "2-12 months", "12-24 months"),
+  legend.position = "top"
 )
 
 print(AgePlot)
@@ -91,27 +101,24 @@ print(AgePlot)
 PlotAge <- AgePlot$plot
 
 # # Kaplan-Meier plot for effect of season
+pal <- c( "#5C5C7A", "#E69F00")
+pal <- c( "#577FC1", "#E5B25D")
 
 SeasonPlot <- ggsurvplot(
   surv_fit(Surv(TimeToEvent, EventCensored) ~ Season,
            data = DeathBirthIntervals),
   fun = "event",
-  linewidth = 1.5,
-  censor.size = 6,
+  linewidth = .8,
+  censor.size = 4,
   axes.offset = TRUE,
-  ggtheme = ggplot2::theme_classic(),
-  palette = "hue",
+  ggtheme = ggplot2::theme_classic(base_size = 6),
+  palette = alpha(pal, .7),
   break.time.by = 12,
   xlab = "Time (months)",
-  ylab = "Completion probability",
-  font.main = c(12, "plain", "black"),
-  font.x = c(12, "plain", "black"),
-  font.y = c(12, "plain", "black"),
-  font.tickslab = c(10, "plain", "black"),
-  legend = c(0.8, 0.3),
+  ylab = "Probability of next birth",
+  legend.position = "top",
   legend.title = "Calf death timing:",
   legend.labs = c("out of season", "in season"),
-  font.legend = c(12, "plain", "black")
 )
 
 print(SeasonPlot)
@@ -122,24 +129,36 @@ PlotSeason <- SeasonPlot$plot
 
 # save age plot
 ggsave(
-  "AgePlot.jpeg",
+  "AgePlot.pdf",
   PlotAge,
-  width = (129),
-  height = (75),
-  units = c("mm"),
-  device = "jpeg",
+  width = (3.25),
+  height = (2),
+  units = c("in"),
   dpi = 1200
 )
+
 
 # save season plot
 ggsave(
-  "SeasonPlot.jpeg",
+  "SeasonPlot.pdf",
   PlotSeason,
-  width = (129),
-  height = (75),
-  units = c("mm"),
-  device = "jpeg",
+  width = (3.25),
+  height = (2),
+  units = c("in"),
   dpi = 1200
 )
 
+
+library(patchwork)
+
+p <- PlotAge / PlotSeason
+
+ggsave(
+  "plots.pdf",
+  p,
+  width = (3.25),
+  height = (4),
+  units = c("in"),
+  dpi = 1200
+)
 
